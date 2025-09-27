@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import axios from 'axios';
 import {
   FACEBOOK_PAGE_ACCESS_TOKEN,
@@ -19,11 +20,9 @@ const setAccountLinkingURL = async (whitelistedDomains = []) => {
       account_linking_url: 'https://google.com',
     };
 
-    // Ajouter les domaines whitelistés si fournis
-    if (whitelistedDomains && whitelistedDomains.length > 0) {
-      requestBody.whitelisted_domains = [...whitelistedDomains, 'https://google.com'];
-      console.log('📋 Whitelisted domains:', whitelistedDomains);
-    }
+    // Ajouter les domaines whitelistés
+    requestBody.whitelisted_domains = whitelistedDomains;
+    console.log('📋 Whitelisted domains:', whitelistedDomains);
 
     const response = await axios.post(`${META_GRAPH_API_URL}/me/messenger_profile`, requestBody, {
       headers: {
@@ -116,6 +115,9 @@ const parseArguments = () => {
   if (args.includes('-U') || args.includes('--unlink-user')) {
     return 'unlink-user';
   }
+  if (args.includes('-h') || args.includes('--help')) {
+    return 'help';
+  }
 
   // If unknown flag, show help
   console.log('❌ Unknown flag. Available options:');
@@ -141,14 +143,10 @@ const showHelp = () => {
   console.log('  -h, --help         Show this help message');
   console.log('');
   console.log('Parameters:');
-  console.log(
-    '  --domains=domain1,domain2  Additional domains to whitelist (base URL and YouTube included by default)',
-  );
+  console.log('  --domains=domain1,domain2  Additional domains to whitelist (base URL included by default)');
   console.log('');
   console.log('Default whitelisted domains:');
   console.log('  - Base URL from config');
-  console.log('  - youtube.com');
-  console.log('  - www.youtube.com');
   console.log('');
   console.log('Examples:');
   console.log(
@@ -184,11 +182,8 @@ const main = async () => {
         const domainsArg = args.find((arg) => arg.startsWith('--domains='));
         const customDomains = domainsArg ? domainsArg.split('=')[1].split(',') : [];
 
-        // Domaines whitelistés par défaut : URL de base et YouTube
-        const defaultDomains = [BASE_URL];
-
-        // Combiner les domaines par défaut avec les domaines personnalisés
-        const whitelistedDomains = [...defaultDomains, ...customDomains];
+        // Domaines whitelistés : URL de base + domaines personnalisés
+        const whitelistedDomains = [BASE_URL, ...customDomains];
 
         await setAccountLinkingURL(whitelistedDomains);
         console.log('🎉 Account linking URL set successfully!');
@@ -210,6 +205,10 @@ const main = async () => {
         console.log(`🗑️  Unlinking user account for PSID: ${psid}...`);
         await unlinkUserAccount(psid);
         console.log('✅ User account unlinked successfully!');
+        break;
+
+      case 'help':
+        showHelp();
         break;
 
       default:
