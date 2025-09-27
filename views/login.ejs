@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login - Messenger Demo</title>
+    <meta name="facebook-domain-verification" content="x0dntu5prz3trr5cl33pgeu4h6h287" />
+
+    <!-- Bootstrap CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+    <!-- FontAwesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+    <style>
+      body {
+        height: 100vh;
+        background-color: #f8f9fa;
+      }
+      .login-card {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        padding: 2rem;
+        max-width: 400px;
+        width: 100%;
+      }
+      .form-control {
+        border-radius: 8px;
+        border: 1px solid #ddd;
+        padding: 12px;
+        margin-bottom: 1rem;
+      }
+      .btn-primary {
+        background-color: #007bff;
+        border: none;
+        border-radius: 8px;
+        padding: 12px;
+        font-weight: 500;
+        width: 100%;
+        margin-bottom: 1rem;
+      }
+      .btn-outline-secondary {
+        border: 1px solid #6c757d;
+        border-radius: 8px;
+        padding: 12px;
+        font-weight: 500;
+        width: 100%;
+        margin-bottom: 1rem;
+      }
+      .btn-facebook {
+        background-color: #1877f2;
+        border: 1px solid #1877f2;
+        color: white;
+        border-radius: 8px;
+        padding: 12px;
+        font-weight: 500;
+        width: 100%;
+        margin-bottom: 1rem;
+        transition: background-color 0.3s ease;
+      }
+      .btn-facebook:hover {
+        background-color: #166fe5;
+        border-color: #166fe5;
+        color: white;
+      }
+      .divider {
+        text-align: center;
+        margin: 1.5rem 0;
+        color: #6c757d;
+        position: relative;
+      }
+      .divider::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: #ddd;
+        z-index: 1;
+      }
+      .divider span {
+        background: white;
+        padding: 0 1rem;
+        position: relative;
+        z-index: 2;
+      }
+      .password-toggle {
+        position: relative;
+      }
+      .password-toggle .toggle-icon {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        color: #6c757d;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container-fluid h-100 d-flex align-items-center justify-content-center">
+      <div class="login-card">
+        <div class="text-center mb-4">
+          <h2 class="mb-2">Connexion</h2>
+          <p class="text-muted">Connectez-vous avec votre email et mot de passe</p>
+        </div>
+
+        <!-- Error message display -->
+        <% if (typeof error !== 'undefined' && error) { %>
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+          <i class="fas fa-exclamation-triangle me-2"></i>
+          <%= error %>
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <% } %>
+
+        <!-- Formulaire de connexion principal -->
+        <form method="POST" action="/auth/email-login" id="emailLoginForm">
+          <div class="mb-3">
+            <input
+              type="email"
+              class="form-control"
+              id="email"
+              name="email"
+              placeholder="Adresse email"
+              value="<%= typeof email !== 'undefined' ? email : '' %>"
+              required
+            />
+          </div>
+
+          <div class="mb-3 password-toggle">
+            <input
+              type="password"
+              class="form-control"
+              id="password"
+              name="password"
+              placeholder="Mot de passe"
+              required
+            />
+            <i class="fas fa-eye toggle-icon" id="togglePassword"></i>
+          </div>
+
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="rememberMe" name="rememberMe" <%= typeof rememberMe
+              !== 'undefined' && rememberMe === 'on' ? 'checked' : '' %> />
+              <label class="form-check-label" for="rememberMe"> Se souvenir de moi </label>
+            </div>
+            <a href="#" class="text-decoration-none">Mot de passe oublié ?</a>
+          </div>
+
+          <button type="submit" class="btn btn-primary">
+            <i class="fas fa-sign-in-alt me-2"></i>
+            Se connecter
+          </button>
+        </form>
+
+        <!-- Séparateur -->
+        <div class="divider">
+          <span>ou</span>
+        </div>
+
+        <!-- Option alternative Facebook -->
+        <form method="POST" action="/auth/login/facebook">
+          <button type="submit" class="btn btn-facebook">
+            <i class="fab fa-facebook-f me-2"></i>
+            Continuer avec Facebook
+          </button>
+        </form>
+
+        <!-- Lien d'inscription -->
+        <div class="text-center mt-3">
+          <p class="mb-0">Pas encore de compte ? <a href="/auth/signup" class="text-decoration-none">S'inscrire</a></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bootstrap JS CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- JavaScript pour la fonctionnalité de basculement du mot de passe -->
+    <script>
+      document.getElementById('togglePassword').addEventListener('click', function () {
+        const passwordField = document.getElementById('password');
+        const toggleIcon = this;
+
+        if (passwordField.type === 'password') {
+          passwordField.type = 'text';
+          toggleIcon.classList.remove('fa-eye');
+          toggleIcon.classList.add('fa-eye-slash');
+        } else {
+          passwordField.type = 'password';
+          toggleIcon.classList.remove('fa-eye-slash');
+          toggleIcon.classList.add('fa-eye');
+        }
+      });
+    </script>
+  </body>
+</html>

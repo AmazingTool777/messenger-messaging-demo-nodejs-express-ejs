@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Inscription - Messenger Demo</title>
+    <meta name="facebook-domain-verification" content="x0dntu5prz3trr5cl33pgeu4h6h287" />
+
+    <!-- Bootstrap CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+    <!-- FontAwesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+    <style>
+      body {
+        min-height: 100vh;
+        background-color: #f8f9fa;
+        padding: 2rem 0;
+      }
+      .signup-card {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        padding: 2rem;
+        max-width: 450px;
+        width: 100%;
+      }
+      .form-control {
+        border-radius: 8px;
+        border: 1px solid #ddd;
+        padding: 12px;
+        margin-bottom: 0.5rem; /* Réduit l'espacement pour les inputs avec texte d'aide */
+      }
+      .form-control.with-helper-text {
+        margin-bottom: 0.25rem; /* Espacement minimal pour les inputs avec texte d'aide */
+      }
+      .form-control:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+      }
+      .btn-primary {
+        background-color: #007bff;
+        border: none;
+        border-radius: 8px;
+        padding: 12px;
+        font-weight: 500;
+        width: 100%;
+        margin-bottom: 1rem;
+      }
+      .btn-facebook {
+        background-color: #1877f2;
+        border: 1px solid #1877f2;
+        color: white;
+        border-radius: 8px;
+        padding: 12px;
+        font-weight: 500;
+        width: 100%;
+        margin-bottom: 1rem;
+        transition: background-color 0.3s ease;
+      }
+      .btn-facebook:hover {
+        background-color: #166fe5;
+        border-color: #166fe5;
+        color: white;
+      }
+      .divider {
+        text-align: center;
+        margin: 1.5rem 0;
+        color: #6c757d;
+        position: relative;
+      }
+      .divider::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: #ddd;
+        z-index: 1;
+      }
+      .divider span {
+        background: white;
+        padding: 0 1rem;
+        position: relative;
+        z-index: 2;
+      }
+      .password-toggle {
+        position: relative;
+      }
+      .password-toggle .toggle-icon {
+        position: absolute;
+        right: 12px;
+        top: 16px; /* Position fixe par rapport au haut de l'input */
+        cursor: pointer;
+        color: #6c757d;
+        z-index: 10;
+      }
+      .password-strength {
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+      }
+      .strength-weak {
+        color: #dc3545;
+      }
+      .strength-medium {
+        color: #ffc107;
+      }
+      .strength-strong {
+        color: #28a745;
+      }
+      .form-check-input:checked {
+        background-color: #007bff;
+        border-color: #007bff;
+      }
+      .terms-text {
+        font-size: 0.875rem;
+        color: #6c757d;
+        margin-top: 0.5rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container-fluid d-flex justify-content-center">
+      <div class="signup-card">
+        <div class="text-center mb-4">
+          <h2 class="mb-2">Créer un compte</h2>
+          <p class="text-muted">Rejoignez-nous en créant votre compte</p>
+        </div>
+
+        <!-- Error message display -->
+        <% if (typeof error !== 'undefined' && error) { %>
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+          <i class="fas fa-exclamation-triangle me-2"></i>
+          <%= error %>
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <% } %>
+
+        <!-- Formulaire d'inscription principal -->
+        <form method="POST" action="/auth/email-signup" id="emailSignupForm">
+          <div class="mb-3">
+            <input
+              type="text"
+              class="form-control"
+              id="fullName"
+              name="fullName"
+              placeholder="Nom complet"
+              value="<%= typeof fullName !== 'undefined' ? fullName : '' %>"
+              required
+            />
+          </div>
+
+          <div class="mb-3">
+            <input
+              type="email"
+              class="form-control"
+              id="email"
+              name="email"
+              placeholder="Adresse email"
+              value="<%= typeof email !== 'undefined' ? email : '' %>"
+              required
+            />
+          </div>
+
+          <div class="mb-3 password-toggle">
+            <input
+              type="password"
+              class="form-control with-helper-text"
+              id="password"
+              name="password"
+              placeholder="Mot de passe"
+              required
+              minlength="8"
+            />
+            <i class="fas fa-eye toggle-icon" id="togglePassword"></i>
+            <div class="password-strength" id="passwordStrength"></div>
+            <small class="form-text text-muted">
+              Le mot de passe doit contenir au moins 8 caractères avec une minuscule, une majuscule, un chiffre et un
+              caractère spécial (@$!%*?&)
+            </small>
+          </div>
+
+          <div class="mb-3 password-toggle">
+            <input
+              type="password"
+              class="form-control with-helper-text"
+              id="confirmPassword"
+              name="confirmPassword"
+              placeholder="Confirmer le mot de passe"
+              required
+            />
+            <i class="fas fa-eye toggle-icon" id="toggleConfirmPassword"></i>
+            <div class="password-strength" id="passwordMatch"></div>
+          </div>
+
+          <button type="submit" class="btn btn-primary">
+            <i class="fas fa-user-plus me-2"></i>
+            Créer mon compte
+          </button>
+        </form>
+
+        <!-- Séparateur -->
+        <div class="divider">
+          <span>ou</span>
+        </div>
+
+        <!-- Option alternative Facebook -->
+        <form method="POST" action="/auth/login/facebook">
+          <button type="submit" class="btn btn-facebook">
+            <i class="fab fa-facebook-f me-2"></i>
+            S'inscrire avec Facebook
+          </button>
+        </form>
+
+        <!-- Lien de connexion -->
+        <div class="text-center mt-3">
+          <p class="mb-0">Déjà un compte ? <a href="/auth/login" class="text-decoration-none">Se connecter</a></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bootstrap JS CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- JavaScript pour les fonctionnalités du formulaire -->
+    <script>
+      // Fonctionnalité de basculement du mot de passe
+      document.getElementById('togglePassword').addEventListener('click', function () {
+        const passwordField = document.getElementById('password');
+        const toggleIcon = this;
+
+        if (passwordField.type === 'password') {
+          passwordField.type = 'text';
+          toggleIcon.classList.remove('fa-eye');
+          toggleIcon.classList.add('fa-eye-slash');
+        } else {
+          passwordField.type = 'password';
+          toggleIcon.classList.remove('fa-eye-slash');
+          toggleIcon.classList.add('fa-eye');
+        }
+      });
+
+      // Fonctionnalité de basculement de la confirmation du mot de passe
+      document.getElementById('toggleConfirmPassword').addEventListener('click', function () {
+        const confirmPasswordField = document.getElementById('confirmPassword');
+        const toggleIcon = this;
+
+        if (confirmPasswordField.type === 'password') {
+          confirmPasswordField.type = 'text';
+          toggleIcon.classList.remove('fa-eye');
+          toggleIcon.classList.add('fa-eye-slash');
+        } else {
+          confirmPasswordField.type = 'password';
+          toggleIcon.classList.remove('fa-eye-slash');
+          toggleIcon.classList.add('fa-eye');
+        }
+      });
+
+      // Vérification de la force du mot de passe
+      document.getElementById('password').addEventListener('input', function () {
+        const password = this.value;
+        const strengthDiv = document.getElementById('passwordStrength');
+
+        if (password.length === 0) {
+          strengthDiv.textContent = '';
+          return;
+        }
+
+        let strength = 0;
+        let strengthText = '';
+        let strengthClass = '';
+
+        if (password.length >= 8) strength++;
+        if (/[a-z]/.test(password)) strength++;
+        if (/[A-Z]/.test(password)) strength++;
+        if (/[0-9]/.test(password)) strength++;
+        if (/[@$!%*?&]/.test(password)) strength++;
+
+        if (strength < 3) {
+          strengthText = 'Mot de passe faible';
+          strengthClass = 'strength-weak';
+        } else if (strength < 5) {
+          strengthText = 'Mot de passe moyen';
+          strengthClass = 'strength-medium';
+        } else {
+          strengthText = 'Mot de passe fort';
+          strengthClass = 'strength-strong';
+        }
+
+        strengthDiv.textContent = strengthText;
+        strengthDiv.className = 'password-strength ' + strengthClass;
+      });
+
+      // Vérification de la correspondance des mots de passe
+      document.getElementById('confirmPassword').addEventListener('input', function () {
+        const password = document.getElementById('password').value;
+        const confirmPassword = this.value;
+        const matchDiv = document.getElementById('passwordMatch');
+
+        if (confirmPassword.length === 0) {
+          matchDiv.textContent = '';
+          return;
+        }
+
+        if (password === confirmPassword) {
+          matchDiv.textContent = '✓ Les mots de passe correspondent';
+          matchDiv.className = 'password-strength strength-strong';
+        } else {
+          matchDiv.textContent = '✗ Les mots de passe ne correspondent pas';
+          matchDiv.className = 'password-strength strength-weak';
+        }
+      });
+
+      // Validation du formulaire
+      document.getElementById('emailSignupForm').addEventListener('submit', function (e) {
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+
+        if (password !== confirmPassword) {
+          e.preventDefault();
+          alert('Les mots de passe ne correspondent pas');
+          return;
+        }
+      });
+    </script>
+  </body>
+</html>
